@@ -10,3 +10,4 @@
 		SONG(MARIO_GAMEOVER), \
 		SONG(RICK_ROLL)       \
 	}
+#endif

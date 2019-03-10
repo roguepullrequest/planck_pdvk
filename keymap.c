@@ -12,7 +12,7 @@ extern keymap_config_t keymap_config;
 
 // Complex Tapdance hoopla
 typedef struct {
-	bool is_press_action
+	bool is_press_action;
 	int state;
 } tap;
 
@@ -26,11 +26,11 @@ enum {
 // Tap dance enums
 enum {
 	X_AT_FUN = 0,
-}
+};
 
 int cur_dance (qk_tap_dance_state_t *state);
 
-void x_finished (qk_tap_dance_state_t state*, void *user_data);
+void x_finished (qk_tap_dance_state_t *state, void *user_data);
 void x_reset (qk_tap_dance_state_t *state, void *user_data);
 
 
@@ -49,7 +49,7 @@ enum custom_keycodes {
 
 enum { // Marco declarations
 	LAST = 0,
-}
+};
 
 // Macro Definitions
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t it, uint8_t out) {
@@ -86,7 +86,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_DLR, KC_7, KC_5, KC_3, KC_1, KC_9, KC_0, KC_2, KC_4, KC_6, KC_8, KC_TRNS,
 		CK_TOGG, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 		CK_UP, CK_DOWN, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS,
+		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS,
 	),
 
 	[_FUNCTION] = LAYOUT_planck_grid(
