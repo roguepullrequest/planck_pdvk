@@ -26,13 +26,16 @@ enum {
 
 // Tap dance enums
 enum {
-	X_AT_FUN = 0,
+	X_AT_FUN = SAFE_RANGE,
+	X_LCTL_LAST
 };
 
 int cur_dance (qk_tap_dance_state_t *state);
 
 void x_finished (qk_tap_dance_state_t *state, void *user_data);
 void x_reset (qk_tap_dance_state_t *state, void *user_data);
+void x_reset_2 (qk_tap_dance_state_t *state, void *user_data);
+void x_finished_2 (qk_tap_dance_state_t *state, void *user_data);
 
 
 // Modified Programmer Dvorak enums
@@ -46,43 +49,21 @@ enum planck_layers {
 
 enum custom_keycodes {
 	PDVK = SAFE_RANGE,
-	KC_LAST
+	LAST
 };
 
-
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  static uint16_t macro_timer;
-
-  switch (keycode){
-    case KC_LAST:
-      if(record->event.pressed){
-        macro_timer = timer_read();
-        register_code(KC_LCTRL);
-      } else {
-        unregister_code(KC_LCTRL);
-        if (timer_elapsed(macro_timer) < 150) {
-          SEND_STRING("!$");
-        }
-      }
-    return false;
-  }
-  return true;
-}
-
-/*
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 	switch (keycode) {
 		case LAST:
 			if (record->event.pressed) {
 				SEND_STRING("!$");
 			} else {
-				PLAY_SONG(mushroom);
 			}
 			break;
 	}
 	return true;
 };
-*/
+
 
 
 #define LOWER MO(_LOWER)
@@ -93,21 +74,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Programmer Dvorak */
 	[_PDVORAK] = LAYOUT_planck_grid(
 		KC_ESC, KC_SCOLON, KC_COMMA, KC_DOT, KC_P, KC_Y, KC_F, KC_G, KC_C, KC_R, KC_L, KC_BSPC,
-   		M(KC_LAST), KC_A, KC_O, KC_E, KC_U, KC_I, KC_D, KC_H, KC_T, KC_N, KC_S, KC_SLASH,
+   		TD(X_LCTL_LAST), KC_A, KC_O, KC_E, KC_U, KC_I, KC_D, KC_H, KC_T, KC_N, KC_S, KC_MINUS,
    		KC_LSPO, KC_QUOT, KC_Q, KC_J, KC_K, KC_X, KC_B, KC_M, KC_W, KC_V, KC_Z, KC_RSPC,
-    		TD(X_AT_FUN), KC_LEFT, KC_UP, KC_DOWN, KC_RIGHT, KC_BSPC, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, MOD_RGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
+    		TD(X_AT_FUN), KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, KC_BSPC, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, MOD_RGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
    	),
 	
 	[_UPPER] = LAYOUT_planck_grid(
-		KC_TILD, KC_AMPR, KC_PERC, KC_LBRC, KC_LCBR, KC_EQL, KC_ASTR, KC_RCBR, KC_RBRC, KC_EXLM, KC_HASH, KC_TRNS,
-		KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_MINUS, KC_BSLASH, 
-		KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+		KC_TILD, KC_AMPR, KC_PERC, KC_LBRC, KC_LCBR, KC_EQL, KC_ASTR, KC_RCBR, KC_RBRC, KC_EXLM, KC_HASH, KC_SLASH,
+		LAST, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_BSLASH, 
+		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS
 	),
 
 	[_LOWER] = LAYOUT_planck_grid(
 		KC_DLR, KC_7, KC_5, KC_3, KC_1, KC_9, KC_0, KC_2, KC_4, KC_6, KC_8, KC_TRNS,
-		CK_TOGG, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+		CK_TOGG, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_UNDS, KC_NO,
 		CK_UP, CK_DOWN, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS
 	),
@@ -159,11 +140,29 @@ void x_reset (qk_tap_dance_state_t *state, void *user_data) {
 		case SINGLE_TAP: unregister_code16(KC_AT); break;
 		case SINGLE_HOLD: unregister_code(_UPPER); break;
 		case DOUBLE_TAP: set_oneshot_layer(_FUNCTION, ONESHOT_PRESSED); break;
-		case DOUBLE_HOLD: reset_keyboard(); break;
 	}
 	xtap_state.state = 0;
 }
 
+
+
+// registering keypresses
+void x_finished_2 (qk_tap_dance_state_t *state, void *user_data) {
+	xtap_state.state = cur_dance(state);
+	switch (xtap_state.state) {
+		case SINGLE_TAP: SEND_STRING("!$"); break;
+		case SINGLE_HOLD: register_code(KC_LCTL); break;
+	}
+}
+// forgetting keypresses
+
+void x_reset_2 (qk_tap_dance_state_t *state, void *user_data) {
+	switch (xtap_state.state) {
+		case SINGLE_HOLD: unregister_code(KC_LCTL); break;
+	}
+	xtap_state.state = 0;
+
 qk_tap_dance_action_t tap_dance_actions[] = {
-	[X_AT_FUN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset)
+	[X_AT_FUN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
+	[X_LCTL_LAST] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished_2, x_reset_2)
 };
