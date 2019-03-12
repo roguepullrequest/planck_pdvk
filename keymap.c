@@ -80,7 +80,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_ESC, KC_SCOLON, KC_COMMA, KC_DOT, KC_P, KC_Y, KC_F, KC_G, KC_C, KC_R, KC_L, KC_BSPC,
    		KC_LAST, KC_A, KC_O, KC_E, KC_U, KC_I, KC_D, KC_H, KC_T, KC_N, KC_S, KC_SLASH,
    		KC_LSPO, KC_QUOT, KC_Q, KC_J, KC_K, KC_X, KC_B, KC_M, KC_W, KC_V, KC_Z, KC_RSPC,
-    		TD(X_AT_FUN), KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, KC_BSPC, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, MOD_RGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
+    		TD(X_AT_FUN), KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, KC_BSPC, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, KC_LGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
    	),
 	
 	[_UPPER] = LAYOUT_planck_grid(
@@ -143,7 +143,7 @@ void x_reset (qk_tap_dance_state_t *state, void *user_data) {
 	switch (xtap_state.state) {
 		case SINGLE_TAP: unregister_code16(KC_AT); break;
 		case SINGLE_HOLD: unregister_code(_UPPER); break;
-		case DOUBLE_TAP: set_oneshot_layer(_FUNCTION, ONESHOT_PRESSED); break;
+		case DOUBLE_TAP: reset_oneshot_layer(); break;
 		case DOUBLE_HOLD: reset_keyboard(); break;
 	}
 	xtap_state.state = 0;
