@@ -70,6 +70,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+#define PDVORAK MO(_PDVORAK)
 #define LOWER MO(_LOWER)
 #define UPPER MO(_UPPER)
 
@@ -132,7 +133,7 @@ void x_finished (qk_tap_dance_state_t *state, void *user_data) {
 	xtap_state.state = cur_dance(state);
 	switch (xtap_state.state) {
 		case SINGLE_TAP: register_code16(KC_AT); break;
-		case SINGLE_HOLD: register_code(_UPPER); break;
+		case SINGLE_HOLD: set_oneshot_layer(_UPPER, ONESHOT_START); break;
 		case DOUBLE_TAP: set_oneshot_layer(_FUNCTION, ONESHOT_START); break;
 		case DOUBLE_HOLD: reset_keyboard(); break;
 	}
@@ -142,8 +143,8 @@ void x_finished (qk_tap_dance_state_t *state, void *user_data) {
 void x_reset (qk_tap_dance_state_t *state, void *user_data) {
 	switch (xtap_state.state) {
 		case SINGLE_TAP: unregister_code16(KC_AT); break;
-		case SINGLE_HOLD: unregister_code(_UPPER); break;
-		case DOUBLE_TAP: reset_oneshot_layer(); break;
+		case SINGLE_HOLD: set_oneshot_layer(_UPPER, ONESHOT_PRESSED); break;
+		case DOUBLE_TAP: set_oneshot_layer(_FUNCTION, ONESHOT_PRESSED); break;
 		case DOUBLE_HOLD: reset_keyboard(); break;
 	}
 	xtap_state.state = 0;
