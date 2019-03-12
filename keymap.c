@@ -6,6 +6,7 @@
 #ifdef AUDIO_ENABLE
 	#include "audio.h"
 	#include "song_list.h"
+	float mushroom[][2] = SONG(MARIO_MUSHROOM);
 #endif
 
 extern keymap_config_t keymap_config;
@@ -45,22 +46,23 @@ enum planck_layers {
 
 enum custom_keycodes {
 	PDVK = SAFE_RANGE,
+	LAST
 };
 
-enum { // Marco declarations
-	LAST = 0,
-};
-
-// Macro Definitions
-const macro_t *action_get_macro(keyrecord_t *record, uint8_t it, uint8_t out) {
-	switch(id) {
-		// !$ To simply get the last parm from the shell. 
-		case LAST: {
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+	switch (keycode) {
+		case LAST:
 			if (record->event.pressed) {
 				SEND_STRING("!$");
-				retern false;
+			} else {
+				PLAY_SONG(mushroom);
 			}
-		}
+			break;
+	}
+	return true;
+};
+
+
 
 #define LOWER MO(_LOWER)
 #define UPPER MO(_UPPER)
@@ -72,28 +74,28 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_ESC, KC_SCOLON, KC_COMMA, KC_DOT, KC_P, KC_Y, KC_F, KC_G, KC_C, KC_R, KC_L, KC_BSPC,
    		LCTL_T(M(LAST)), KC_A, KC_O, KC_E, KC_U, KC_I, KC_D, KC_H, KC_T, KC_N, KC_S, KC_SLASH,
    		KC_LSPO, KC_QUOT, KC_Q, KC_J, KC_K, KC_X, KC_B, KC_M, KC_W, KC_V, KC_Z, KC_RSPC,
-    		TD(X_AT_FUN), KC_LEFT, KC_UP, KC_DOWN, KC_RIGHT, KC_BSPC, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, MOD_RGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS),
+    		TD(X_AT_FUN), KC_LEFT, KC_UP, KC_DOWN, KC_RIGHT, KC_BSPC, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, MOD_RGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
    	),
 	
 	[_UPPER] = LAYOUT_planck_grid(
 		KC_TILD, KC_AMPR, KC_PERC, KC_LBRC, KC_LCBR, KC_EQL, KC_ASTR, KC_RCBR, KC_RBRC, KC_EXLM, KC_HASH, KC_TRNS,
 		M(LAST), KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_MINUS, KC_BSLASH, 
 		KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS,
+		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS
 	),
 
 	[_LOWER] = LAYOUT_planck_grid(
 		KC_DLR, KC_7, KC_5, KC_3, KC_1, KC_9, KC_0, KC_2, KC_4, KC_6, KC_8, KC_TRNS,
 		CK_TOGG, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 		CK_UP, CK_DOWN, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS,
+		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS
 	),
 
 	[_FUNCTION] = LAYOUT_planck_grid(
-		FN_11, FN_7, FN_5, FN_3, FN_1, FN_9, FN_12, FN_2, FN_4, FN_6, FN_8, RESET,
+		KC_F11, KC_F7, KC_F5, KC_F3, KC_F1, KC_F9, KC_F12, KC_F2, KC_F4, KC_F6, KC_F8, RESET,
 		KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 		KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS,
+		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS
 	),
 };
 
@@ -102,12 +104,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 int cur_dance (qk_tap_dance_state_t *state) {
 	if (state->count == 1) {
-		if (state->interrupted \\ !state->pressed) return SINGLE_TAP;
+		if (state->interrupted || !state->pressed) return SINGLE_TAP;
 		// key not interrupted, but still held sends 'HOLD'
 		else return SINGLE_HOLD;
 	}
 	else if (state->count == 2) {
-		if (state->interrupted || !state->pressed) return DOUBLE_TAP
+		if (state->interrupted || !state->pressed) return DOUBLE_TAP;
 		else return DOUBLE_HOLD;
 	}
 	else return 8; // magic number that i dont believe works. 
