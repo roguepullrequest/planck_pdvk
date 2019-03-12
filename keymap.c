@@ -143,8 +143,8 @@ void x_finished (qk_tap_dance_state_t *state, void *user_data) {
 void x_reset (qk_tap_dance_state_t *state, void *user_data) {
 	switch (xtap_state.state) {
 		case SINGLE_TAP: unregister_code16(KC_AT); break;
-		case SINGLE_HOLD: set_oneshot_layer(_UPPER, ONESHOT_PRESSED); break;
-		case DOUBLE_TAP: set_oneshot_layer(_FUNCTION, ONESHOT_PRESSED); break;
+		case SINGLE_HOLD: clear_oneshot_layer_state(ONESHOT_PRESSED); break;
+		case DOUBLE_TAP: clear_oneshot_layer_state(ONESHOT_PRESSED); break;
 		case DOUBLE_HOLD: reset_keyboard(); break;
 	}
 	xtap_state.state = 0;
