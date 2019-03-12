@@ -49,6 +49,7 @@ enum custom_keycodes {
 	KC_LAST
 };
 
+// For getting the last arg in shell line (SUPER THANKS to Drashna over on Discord)
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t macro_timer;
@@ -57,9 +58,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_LAST:
       if(record->event.pressed){
         macro_timer = timer_read();
-        register_code(KC_LCTRL);
+        register_mods(MOD_BIT(KC_LCTRL));
       } else {
-        unregister_code(KC_LCTRL);
+        unregister_mods(MOD_BIT(KC_LCTRL));
         if (timer_elapsed(macro_timer) < 150) {
           SEND_STRING("!$");
         }
@@ -68,22 +69,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
   return true;
 }
-
-/*
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-	switch (keycode) {
-		case LAST:
-			if (record->event.pressed) {
-				SEND_STRING("!$");
-			} else {
-				PLAY_SONG(mushroom);
-			}
-			break;
-	}
-	return true;
-};
-*/
-
 
 #define LOWER MO(_LOWER)
 #define UPPER MO(_UPPER)
@@ -107,8 +92,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 	[_LOWER] = LAYOUT_planck_grid(
 		KC_DLR, KC_7, KC_5, KC_3, KC_1, KC_9, KC_0, KC_2, KC_4, KC_6, KC_8, KC_TRNS,
-		CK_TOGG, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-		CK_UP, CK_DOWN, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+		KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+		KC_NO, CK_DOWN, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS
 	),
 
