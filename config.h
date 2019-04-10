@@ -1,7 +1,8 @@
 #pragma once
 
 #ifdef AUDIO_ENABLE
-	#define STARTUP_SONG SONG(TO_BOLDLY_GO)
+	#define STARTUP_SONG SONG(RICK_ROLL)
+	
 	#define DEFAULT_LAYER_SONGS { \
 /*		SONG(ZELDA_PUZZLE),   \
 	       	SONG(MARIO_MUSHROOM), \

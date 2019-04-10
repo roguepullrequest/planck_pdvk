@@ -1,5 +1,4 @@
 #include QMK_KEYBOARD_H
-#include "muse.h"
 #include "planck.h"
 #include "eeconfig.h"
 
@@ -22,11 +21,15 @@ enum {
 	SINGLE_HOLD = 2,
 	DOUBLE_TAP = 3,
 	DOUBLE_HOLD = 4,
+	TRIPLE_TAP = 5,
+	TRIPLE_HOLD = 6,
 };
 
 // Tap dance enums
 enum {
 	X_AT_FUN = 0,
+	SH_M_LPAREN,
+	SH_M_RPAREN
 };
 
 int cur_dance (qk_tap_dance_state_t *state);
@@ -34,6 +37,8 @@ int cur_dance (qk_tap_dance_state_t *state);
 void x_finished (qk_tap_dance_state_t *state, void *user_data);
 void x_reset (qk_tap_dance_state_t *state, void *user_data);
 
+bool is_alt_tab_active = false;
+uint16_t alt_tab_timer = 0;
 
 // Modified Programmer Dvorak enums
 
@@ -46,13 +51,29 @@ enum planck_layers {
 
 enum custom_keycodes {
 	PDVK = SAFE_RANGE,
-	KC_LAST
+	KC_LAST,
+	ALT_TAB
 };
 
 // For getting the last arg in shell line (SUPER THANKS to Drashna over on Discord)
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t macro_timer;
+
+  switch (keycode) {
+    case ALT_TAB:
+      if (record->event.pressed) {
+        if (!is_alt_tab_active) {
+          is_alt_tab_active = true;
+          register_code(KC_LALT);
+        }
+        alt_tab_timer = timer_read();
+        register_code(KC_TAB);
+      } else {
+        unregister_code(KC_TAB);
+      }
+      break;
+  }
 
   switch (keycode){
     case KC_LAST:
@@ -70,6 +91,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+void matrix_scan_user(void) {
+  if (is_alt_tab_active) {
+    if (timer_elapsed(alt_tab_timer) > 1000) {
+      unregister_code16(KC_LALT);
+      is_alt_tab_active = false;
+    }
+  }
+}
+
 #define PDVORAK MO(_PDVORAK)
 #define LOWER MO(_LOWER)
 #define UPPER MO(_UPPER)
@@ -78,10 +108,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Programmer Dvorak */
 	[_PDVORAK] = LAYOUT_planck_grid(
-		KC_ESC, KC_SCOLON, KC_COMMA, KC_DOT, KC_P, KC_Y, KC_F, KC_G, KC_C, KC_R, KC_L, KC_BSPC,
+		KC_GESC, KC_SCOLON, KC_COMMA, KC_DOT, KC_P, KC_Y, KC_F, KC_G, KC_C, KC_R, KC_L, KC_BSPC,
    		KC_LAST, KC_A, KC_O, KC_E, KC_U, KC_I, KC_D, KC_H, KC_T, KC_N, KC_S, KC_SLASH,
    		KC_LSPO, KC_QUOT, KC_Q, KC_J, KC_K, KC_X, KC_B, KC_M, KC_W, KC_V, KC_Z, KC_RSPC,
-    		TD(X_AT_FUN), KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, KC_LALT, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, KC_LGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
+    		TD(X_AT_FUN), KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, ALT_TAB, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, KC_LGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
    	),
 	
 	[_UPPER] = LAYOUT_planck_grid(
@@ -153,3 +183,5 @@ void x_reset (qk_tap_dance_state_t *state, void *user_data) {
 qk_tap_dance_action_t tap_dance_actions[] = {
 	[X_AT_FUN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset)
 };
+
+void shutdown_user(void) { clear_keyboard(); }
