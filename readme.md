@@ -3,6 +3,9 @@
 ![LAYOUT IMAGE v0.1](layout.jpg?raw=true "Planck Layout")
 
 
+|Magic|---|UPPER|
+|---|DEFAULT|---|
+|FUCN|---|LOWER|
 
 # Layout notes
 -  ALT_TAB = cycle through windows as long as you keep tapping it keeps alt tabbing
