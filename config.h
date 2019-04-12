@@ -1,5 +1,8 @@
 #pragma once
 
+#define DEVICE_VER	0x0004
+
+
 #ifdef AUDIO_ENABLE
 	#define STARTUP_SONG SONG(RICK_ROLL)
 	
