@@ -1,10 +1,6 @@
 #include QMK_KEYBOARD_H
-#include "planck.h"
-#include "eeconfig.h"
 
 #ifdef AUDIO_ENABLE
-	#include "audio.h"
-	#include "song_list.h"
 	float mushroom[][2] = SONG(MARIO_MUSHROOM);
 #endif
 
@@ -28,14 +24,28 @@ enum {
 // Tap dance enums
 enum {
 	X_AT_FUN = 0,
-	SH_M_LPAREN,
-	SH_M_RPAREN
+	RSHIFT,
+	LSHIFT,
+	TD_SMICN,
+	TD_COMMA,
+	TD_DOT,
+	TD_P,
+	TD_Y,
+	TD_F,
+	TD_G,
+	TD_C,
+	TD_R,
+	TD_L,
+	TD_S
+
 };
 
 int cur_dance (qk_tap_dance_state_t *state);
 
 void x_finished (qk_tap_dance_state_t *state, void *user_data);
 void x_reset (qk_tap_dance_state_t *state, void *user_data);
+void lshift_finished (qk_tap_dance_state_t *state, void *user_data);
+void lshift_reset(qk_tap_dance_state_t *state, void *user_data);
 
 bool is_alt_tab_active = false;
 uint16_t alt_tab_timer = 0;
@@ -92,13 +102,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 void matrix_scan_user(void) {
-  if (is_alt_tab_active) {
+  if (is_alt_tab_active) 
     if (timer_elapsed(alt_tab_timer) > 1000) {
       unregister_code16(KC_LALT);
       is_alt_tab_active = false;
     }
   }
-}
 
 #define PDVORAK MO(_PDVORAK)
 #define LOWER MO(_LOWER)
@@ -109,14 +118,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Programmer Dvorak */
 	[_PDVORAK] = LAYOUT_planck_grid(
 		KC_GESC, KC_SCOLON, KC_COMMA, KC_DOT, KC_P, KC_Y, KC_F, KC_G, KC_C, KC_R, KC_L, KC_BSPC,
-   		KC_LAST, KC_A, KC_O, KC_E, KC_U, KC_I, KC_D, KC_H, KC_T, KC_N, KC_S, KC_SLASH,
-   		KC_LSPO, KC_QUOT, KC_Q, KC_J, KC_K, KC_X, KC_B, KC_M, KC_W, KC_V, KC_Z, KC_RSPC,
+   		KC_LAST, KC_A, KC_O, KC_E, KC_U, KC_I, KC_D, KC_H, KC_T, KC_N, TD(TD_S), KC_SLASH,
+   		TD(LSHIFT), KC_QUOT, KC_Q, KC_J, KC_K, KC_X, KC_B, KC_M, KC_W, KC_V, KC_Z, TD(RSHIFT),
     		TD(X_AT_FUN), KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, ALT_TAB, KC_SPACE, KC_ENTER, MT(MOD_LCTL | MOD_LSFT, KC_LGUI), KC_PGUP, KC_PGDN, LT(_LOWER, KC_PLUS)
    	),
 	
 	[_UPPER] = LAYOUT_planck_grid(
-		KC_GRAVE, KC_AMPR, KC_PERC, KC_LBRC, KC_LCBR, KC_EQL, KC_ASTR, KC_RCBR, KC_RBRC, KC_EXLM, KC_HASH, KC_TRNS,
-		KC_PLUS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_MINUS, KC_BSLASH, 
+		KC_GRAVE, KC_AMPR, KC_PERC, KC_NO, KC_NO, KC_EQL, KC_ASTR, KC_NO, KC_NO, KC_EXLM, KC_HASH, KC_TRNS,
+		KC_PLUS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_BSLASH, 
 		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 		KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS
 	),
@@ -149,6 +158,10 @@ int cur_dance (qk_tap_dance_state_t *state) {
 		if (state->interrupted || !state->pressed) return DOUBLE_TAP;
 		else return DOUBLE_HOLD;
 	}
+	else if (state->count == 3) {
+		if (state->interrupted || !state->pressed)return TRIPLE_TAP;
+		else return TRIPLE_HOLD;
+	}
 	else return 8; // magic number that i dont believe works. 
 }
 
@@ -168,6 +181,34 @@ void x_finished (qk_tap_dance_state_t *state, void *user_data) {
 		case DOUBLE_HOLD: reset_keyboard(); break;
 	}
 }
+void lshift_finished (qk_tap_dance_state_t *state, void *user_data) {
+	xtap_state.state = cur_dance(state);
+	switch (xtap_state.state) {
+		case SINGLE_TAP: register_code16(KC_LSFT); register_code16(KC_9); break;
+		case SINGLE_HOLD: register_code16(KC_LSFT); break;
+		case DOUBLE_TAP: register_code16(KC_LBRC); break;
+		case TRIPLE_TAP: register_code16(KC_LSFT); register_code16(KC_LBRC); break;
+	}
+}
+void s_finished (qk_tap_dance_state_t *state, void *user_data) {
+	xtap_state.state = cur_dance(state);
+	switch (xtap_state.state) {
+		case SINGLE_TAP: register_code16(KC_S); break;
+		case DOUBLE_TAP: register_code16(KC_MINUS); break;
+		case TRIPLE_TAP: register_code16(KC_LSFT); register_code16(KC_MINUS); break;
+	}
+}
+
+void rshift_finished (qk_tap_dance_state_t *state, void *user_data) {
+	xtap_state.state = cur_dance(state);
+	switch (xtap_state.state) {
+		case SINGLE_TAP: register_code16(KC_LSFT); register_code16(KC_0); break;
+		case SINGLE_HOLD: register_code16(KC_RSFT); break;
+		case DOUBLE_TAP: register_code16(KC_RBRC); break;
+		case TRIPLE_TAP: register_code16(KC_LSFT); register_code16(KC_RBRC); break;
+	}
+}
+
 // forgetting keypresses
 
 void x_reset (qk_tap_dance_state_t *state, void *user_data) {
@@ -179,9 +220,39 @@ void x_reset (qk_tap_dance_state_t *state, void *user_data) {
 	}
 	xtap_state.state = 0;
 }
+void lshift_reset (qk_tap_dance_state_t *state, void *user_data) {
+	switch (xtap_state.state) {
+		case SINGLE_TAP: unregister_code16(KC_9); unregister_code16(KC_LSFT); break;
+		case SINGLE_HOLD: unregister_code16(KC_LSFT); break;
+		case DOUBLE_TAP: unregister_code16(KC_LBRC); break;
+		case TRIPLE_TAP: unregister_code16(KC_LBRC); unregister_code16(KC_LSFT); break;
+	}
+	xtap_state.state = 0;
+}
 
+void rshift_reset (qk_tap_dance_state_t *state, void *user_data) {
+	switch (xtap_state.state) {
+		case SINGLE_TAP: unregister_code16(KC_0); unregister_code16(KC_LSFT); break;
+		case SINGLE_HOLD: unregister_code16(KC_RSFT); break;
+		case DOUBLE_TAP: unregister_code16(KC_RBRC); break;
+		case TRIPLE_TAP: unregister_code16(KC_RBRC); unregister_code16(KC_LSFT); break;
+	}
+	xtap_state.state = 0;
+}
+void s_reset (qk_tap_dance_state_t *state, void *user_data) {
+	switch (xtap_state.state) {
+		case SINGLE_TAP: unregister_code16(KC_S); break;
+		case DOUBLE_TAP: unregister_code16(KC_MINUS); break;
+		case TRIPLE_TAP: unregister_code16(KC_MINUS); unregister_code16(KC_LSFT);  break;
+	}
+	xtap_state.state = 0;
+}
 qk_tap_dance_action_t tap_dance_actions[] = {
-	[X_AT_FUN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset)
+	[X_AT_FUN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
+	[LSHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lshift_finished, lshift_reset),
+	[RSHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, rshift_finished, rshift_reset),
+	[TD_S] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, s_finished, s_reset),
+
 };
 
 void shutdown_user(void) { clear_keyboard(); }
